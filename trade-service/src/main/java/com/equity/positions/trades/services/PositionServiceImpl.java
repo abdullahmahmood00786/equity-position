@@ -150,7 +150,7 @@ public class PositionServiceImpl implements PositionService {
 		}
 		var transactionWithMaxVersion = existingTransactions.stream().sorted(Comparator.comparing(Transaction::getVersion).reversed()).findFirst().orElse(null);
 		 // reverse later transaction
-		 int reverseDelta = transactionWithMaxVersion.getTradeType() == TradeType.BUY ? -transactionWithMaxVersion.getQuantity() : transactionWithMaxVersion.getQuantity();
+		int reverseDelta = transactionWithMaxVersion.getTradeType() == TradeType.BUY ? -transactionWithMaxVersion.getQuantity() : transactionWithMaxVersion.getQuantity();
 		updatePosition(transactionWithMaxVersion.getSecurityCode(), reverseDelta);
 
 		// Apply new version
