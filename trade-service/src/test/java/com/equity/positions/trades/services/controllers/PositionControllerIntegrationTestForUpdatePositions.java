@@ -38,8 +38,8 @@ class PositionControllerIntegrationTestForUpdatePositions {
 	void shouldUpdateTransactionsAndReturnPositions() {
 		// Given
 		var transaction1 = new Transaction(1L, 1, "REL", 50, Action.INSERT, TradeType.BUY);
-		var transaction2 = new Transaction(1L, 1, "REL", 40, Action.INSERT, TradeType.BUY);
-		var transaction3 = new Transaction(1L, 1, "INF", 70, Action.INSERT, TradeType.SELL);
+		var transaction2 = new Transaction(1L, 1, "REL", 40, Action.UPDATE, TradeType.BUY);
+		var transaction3 = new Transaction(1L, 1, "INF", 70, Action.UPDATE, TradeType.SELL);
 		
 
 		// When
@@ -54,23 +54,4 @@ class PositionControllerIntegrationTestForUpdatePositions {
 		assertThat(response.getBody()).containsExactlyInAnyOrder(new Position("INF", -70));
 	}
 	
-	@Test
-	void shouldCancelTransactionsAndReturnPositions() {
-		// Given
-		var transaction1 = new Transaction(1L, 1, "REL", 50, Action.INSERT, TradeType.BUY);
-		var transaction2 = new Transaction(1L, 1, "REL", 40, Action.INSERT, TradeType.BUY);
-		var transaction3 = new Transaction(1L, 1, "INF", 70, Action.CANCEL, TradeType.SELL);
-		
-
-		// When
-		restTemplate.postForEntity("/api/transactions", transaction1, Void.class);
-		restTemplate.postForEntity("/api/transactions", transaction2, Void.class);
-		restTemplate.postForEntity("/api/transactions", transaction3, Void.class);
-		
-		var response = restTemplate.getForEntity("/api/transactions/positions", Position[].class);
-
-		// Then
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody()).containsExactlyInAnyOrder(new Position("INF", 0),new Position("REL", 0));
-	}
 }

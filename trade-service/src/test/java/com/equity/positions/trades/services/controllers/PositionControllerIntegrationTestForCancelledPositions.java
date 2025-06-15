@@ -38,7 +38,7 @@ class PositionControllerIntegrationTestForCancelledPositions {
 	void shouldCancelTransactionsAndReturnPositions() {
 		// Given
 		var transaction1 = new Transaction(1L, 1, "REL", 50, Action.INSERT, TradeType.BUY);
-		var transaction2 = new Transaction(1L, 1, "REL", 40, Action.INSERT, TradeType.BUY);
+		var transaction2 = new Transaction(1L, 1, "REL", 40, Action.UPDATE, TradeType.BUY);
 		var transaction3 = new Transaction(1L, 1, "INF", 70, Action.CANCEL, TradeType.SELL);
 		
 
