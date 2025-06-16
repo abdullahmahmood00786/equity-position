@@ -8,6 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import com.equity.positions.trades.entity.Position;
 import com.equity.positions.trades.entity.Transaction;
@@ -18,7 +20,8 @@ import com.equity.positions.trades.repository.TransactionRepository;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class PositionControllerIntegrationTest {
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+public class PositionControllerIntegrationTest {
 
 	static {
 		System.setProperty("spring.profiles.active", "test");
@@ -72,4 +75,6 @@ class PositionControllerIntegrationTest {
 		assertThat(response.getBody()).containsExactlyInAnyOrder(new Position("REL", 60), new Position("ITC", 0),
 				new Position("INF", 50),new Position("VB", 0));
 	}
+	
+	
 }
