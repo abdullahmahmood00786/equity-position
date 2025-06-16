@@ -54,9 +54,10 @@ public class PositionServiceImpl implements PositionService {
 	}
 
 	private void performAction(Transaction transaction) {
+		var existingTransactions = transactionRepository.findByTradeIdOrderByVersionAsc(transaction.getTradeId());
 		switch (transaction.getAction()) {
 		case INSERT -> {
-			var existingTransactions = transactionRepository.findByTradeIdOrderByVersionAsc(transaction.getTradeId());
+			
 
 			if (existingTransactions.isEmpty()) {
 				processInsert(transaction);
@@ -73,22 +74,20 @@ public class PositionServiceImpl implements PositionService {
 
 		}
 		case UPDATE -> {
-			var existingTransactions = transactionRepository.findByTradeIdOrderByVersionAsc(transaction.getTradeId());
 
 			boolean isCanceled = existingTransactions.stream().anyMatch(tx -> tx.getAction().equals(Action.CANCEL));
 			if (isCanceled) {
 				throw new IllegalStateException("Trade is already cancelled, No Change is Allowed.");
 			}
-			processUpdate(transaction);
+			processUpdate(transaction, existingTransactions);
 		}
 		case CANCEL -> {
-			var existingTransactions = transactionRepository.findByTradeIdOrderByVersionAsc(transaction.getTradeId());
 
 			boolean isCanceled = existingTransactions.stream().anyMatch(tx -> tx.getAction().equals(Action.CANCEL));
 			if (isCanceled) {
 				throw new IllegalStateException("Trade is already cancelled, No Change is Allowed.");
 			}
-			processCancel(transaction);
+			processCancel(transaction, existingTransactions);
 		}
 		}
 		log.info("Transaction with TRADE ID : {} , ACTION :{}, OF TYPE {} is processed.",transaction.getTradeId(),transaction.getAction(),transaction.getTradeType());
@@ -142,8 +141,7 @@ public class PositionServiceImpl implements PositionService {
 		transactionRepository.save(transaction);
 	}
 
-	private void processUpdate(Transaction transaction) {
-		var existingTransactions = transactionRepository.findByTradeIdOrderByVersionAsc(transaction.getTradeId());
+	private void processUpdate(Transaction transaction, List<Transaction> existingTransactions) {
 
 		if (existingTransactions.isEmpty()) {
 			throw new IllegalStateException("No existing transaction to update");
@@ -161,9 +159,8 @@ public class PositionServiceImpl implements PositionService {
 		transactionRepository.save(transaction);
 	}
 
-	private void processCancel(Transaction transaction) {
+	private void processCancel(Transaction transaction, List<Transaction> existingTransactions) {
 		
-		var existingTransactions = transactionRepository.findByTradeIdOrderByVersionAsc(transaction.getTradeId());
 
 		if (existingTransactions.isEmpty()) {
 			throw new IllegalStateException("No existing transaction to cancel");

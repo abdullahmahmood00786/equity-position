@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -44,30 +45,46 @@ public class PositionServiceImplTest {
 
     @Test
     void testProcessTransactionUpdate() {
+    	
+        TransactionDTO dto1 = new TransactionDTO(2l,2l, 1, "securityCode", 10, Action.INSERT, TradeType.BUY);
+        positionService.processTransaction(dto1);
+        
         // Arrange
+        Transaction existingTransaction = new Transaction(dto1.tradeId(), dto1.version(), dto1.securityCode(), dto1.quantity(),dto1.action(), dto1.tradeType());
         TransactionDTO dto = new TransactionDTO(2l,2l, 2, "securityCode", 15, Action.UPDATE, TradeType.BUY);
-        Transaction existingTransaction = new Transaction(2l, 1, "securityCode", 10, Action.INSERT, TradeType.BUY);
         when(transactionRepository.findByTradeIdOrderByVersionAsc(dto.tradeId())).thenReturn(List.of(existingTransaction));
+
 
         // Act
         positionService.processTransaction(dto);
 
         // Assert
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
+        verify(transactionRepository, times(2)).save(any(Transaction.class));
+        
+        List<Position> positions = positionService.getCurrentPositions();
+        assertThat(positions).containsExactlyInAnyOrder(new Position("securityCode", 15));
     }
 
     @Test
     void testProcessTransactionCancel() {
+        
+        TransactionDTO dto1 = new TransactionDTO(2l,2l, 1, "securityCode", 10, Action.INSERT, TradeType.BUY);
+        positionService.processTransaction(dto1);
+        
         // Arrange
+        Transaction existingTransaction = new Transaction(dto1.tradeId(), dto1.version(), dto1.securityCode(), dto1.quantity(),dto1.action(), dto1.tradeType());
         TransactionDTO dto = new TransactionDTO(2l,2l, 2, "securityCode", 10, Action.CANCEL, TradeType.BUY);
-        Transaction existingTransaction = new Transaction(2l, 1, "securityCode", 10, Action.INSERT, TradeType.BUY);
         when(transactionRepository.findByTradeIdOrderByVersionAsc(dto.tradeId())).thenReturn(List.of(existingTransaction));
+
 
         // Act
         positionService.processTransaction(dto);
 
         // Assert
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
+        verify(transactionRepository, times(2)).save(any(Transaction.class));
+        
+        List<Position> positions = positionService.getCurrentPositions();
+        assertThat(positions).containsExactlyInAnyOrder(new Position("securityCode", 0));
     }
 
     @Test
